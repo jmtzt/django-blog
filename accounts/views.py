@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
@@ -9,7 +9,8 @@ def signup_view(request):
         if form.is_valid():
             form.save()
             # log the user in
-            # return render(request, 'accounts/signup_success.html')
+            user = form.get_user()
+            login(request, user)
             return redirect('articles:list')
     else:
         form = UserCreationForm()
@@ -22,10 +23,12 @@ def login_view(request):
             # log the user in
             user = form.get_user()
             login(request, user)
-            if 'next' in request.POST:
-                return redirect(request.POST.get('next'))
-            else:
-                return redirect('articles:list')
+            return redirect('articles:list')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', { 'form': form })
+
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('articles:list')
